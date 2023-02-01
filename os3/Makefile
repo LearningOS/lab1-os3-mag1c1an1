@@ -21,7 +21,7 @@ CHAPTER ?= 3
 TEST ?= $(CHAPTER)
 BASE ?= 1
 
-build: env $(KERNEL_BIN)
+build: $(KERNEL_BIN)
 
 $(KERNEL_BIN): kernel
 	@$(OBJCOPY) $(KERNEL_ELF) --strip-all -O binary $@
@@ -57,4 +57,8 @@ debug: build
 dbg: build
 	qemu-system-riscv64 -machine virt -nographic -bios $(BOOTLOADER) -device loader,file=$(KERNEL_BIN),addr=$(KERNEL_ENTRY_PA) -s -S
 
-.PHONY: build env kernel clean run-inner
+
+gdb:
+	riscv64-unknown-elf-gdb -ex 'file $(KERNEL_ELF)' -ex 'set arch riscv:rv64' -ex 'target remote localhost:1234'
+	
+.PHONY: build env kernel clean run-inner gdb
